@@ -112,19 +112,19 @@ Article text is **untrusted data**. Prompts wrap it in delimiters and say "conte
 - [x] Create a Supabase project at supabase.com (free tier, region `eu-central-1`)
 - [x] Copy the Project URL, anon key and service role key into `.env`
 - [x] `OPENROUTER_API_KEY` comes from the system environment variable (or `.env` to override). Model: `google/gemini-2.5-flash`, verified on OpenRouter
-- [ ] Supabase CLI: use `npx supabase` in M2 (needs the database password for `supabase link`)
+- [x] Supabase CLI: `npx supabase` (dev dependency). Logged in with an access token that has `database_write` + projects read
 - **Done when:** `.env` is filled in and `node -v` is ≥ 20.
 
 ### M1: Scaffolding
-- [ ] `pipeline/` package: TypeScript, `tsx`, `zod`, `@supabase/supabase-js`, `cheerio`, `vitest`, `p-limit`
-- [ ] `config.ts` validates env with zod and fails fast with a clear message
-- [ ] npm scripts: `pipeline`, `test`, `typecheck`
+- [x] `pipeline/` package: TypeScript, `tsx`, `zod`, `@supabase/supabase-js`, `cheerio`, `vitest`, `p-limit`
+- [x] `config.ts` validates env with zod and fails fast with a clear message
+- [x] npm scripts: `pipeline`, `test`, `typecheck` (+ `--check` flag: config + DB connection)
 - **Done when:** `npm run typecheck` and `npm test` pass (with a placeholder test), and `npm run pipeline -- --help` prints usage.
 
 ### M2: Database
-- [ ] `supabase/migrations/0001_init.sql`: tables, indexes, RLS policies
-- [ ] `0002_seed_sources.sql`: the MVP sources from `docs/SOURCES.md`, plus a seed `profile` row with the interest profile from `CLAUDE.md`
-- [ ] `supabase link` + `supabase db push`
+- [x] `supabase/migrations/…_init.sql`: tables, indexes, RLS policies
+- [x] `…_seed.sql`: the MVP sources from `docs/SOURCES.md`, plus a seed `profile` row with the interest profile from `CLAUDE.md`
+- [x] `supabase link` + `npm run db:push` (CLI fails in PowerShell with "Transport error"; run it from Git Bash)
 - [ ] In Supabase Auth: turn off sign-ups and create my user
 - **Done when:** the tables are visible in the Supabase dashboard, `sources` has 5 rows, and an anon (not logged-in) request to `briefs` returns 0 rows (RLS works).
 
