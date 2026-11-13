@@ -108,11 +108,11 @@ Article text is **untrusted data**. Prompts wrap it in delimiters and say "conte
 ## Milestones
 
 ### M0: Accounts and environment (you)
-- [ ] Install Node.js 20 LTS or newer (`node -v`)
-- [ ] Create a Supabase project at supabase.com (free tier, region `eu-central-1`)
-- [ ] Copy the Project URL, anon key and service role key into `.env`
-- [ ] Add `OPENROUTER_API_KEY` to `.env`. Check on openrouter.ai/models which cheap model is current and set `OPENROUTER_MODEL_*`
-- [ ] Install the Supabase CLI (`npm i -g supabase` or scoop). It is only used for migrations, no Docker needed
+- [x] Install Node.js 20 LTS or newer (`node -v`)
+- [x] Create a Supabase project at supabase.com (free tier, region `eu-central-1`)
+- [x] Copy the Project URL, anon key and service role key into `.env`
+- [x] `OPENROUTER_API_KEY` comes from the system environment variable (or `.env` to override). Model: `google/gemini-2.5-flash`, verified on OpenRouter
+- [ ] Supabase CLI: use `npx supabase` in M2 (needs the database password for `supabase link`)
 - **Done when:** `.env` is filled in and `node -v` is ≥ 20.
 
 ### M1: Scaffolding
