@@ -1,6 +1,8 @@
 import { parseArgs } from "node:util";
 import { loadConfig } from "./config.js";
 import { createDb } from "./db.js";
+import { runFetch } from "./steps/fetch.js";
+import { finishRun, startRun, type RunStatus } from "./steps/runLog.js";
 
 const STEPS = ["fetch", "summarize", "brief", "all"] as const;
 type Step = (typeof STEPS)[number];
@@ -49,8 +51,27 @@ async function main(): Promise<void> {
     return;
   }
 
-  // Steps are implemented in M3 (fetch), M4 (summarize), M5 (brief).
-  console.log(`Step "${step}" is not implemented yet.${values["dry-run"] ? " (dry run)" : ""}`);
+  const dryRun = values["dry-run"];
+  const runId = dryRun ? null : await startRun(db);
+  const stats: Record<string, unknown> = {};
+  let status: RunStatus = "success";
+
+  try {
+    if (step === "fetch" || step === "all") {
+      const since = new Date(Date.now() - config.FETCH_WINDOW_HOURS * 3600_000);
+      console.log(`Fetching articles published since ${since.toISOString()}${dryRun ? " (dry run)" : ""}`);
+      const fetchResult = await runFetch(db, { since, dryRun });
+      stats.fetch = fetchResult;
+      if (fetchResult.failedSources > 0) status = "partial";
+      console.log(`Fetch done: ${fetchResult.totalInserted} new articles, ${fetchResult.failedSources} failed sources.`);
+    }
+    if (step === "summarize" || step === "all") console.log("Summarize: not implemented yet (M4).");
+    if (step === "brief" || step === "all") console.log("Brief: not implemented yet (M5).");
+  } catch (err) {
+    if (runId) await finishRun(db, runId, "failed", stats, err instanceof Error ? err.message : String(err));
+    throw err;
+  }
+  if (runId) await finishRun(db, runId, status, stats);
 }
 
 main().catch((err: unknown) => {

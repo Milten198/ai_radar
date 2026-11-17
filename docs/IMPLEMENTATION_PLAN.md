@@ -129,11 +129,13 @@ Article text is **untrusted data**. Prompts wrap it in delimiters and say "conte
 - **Done when:** the tables are visible in the Supabase dashboard, `sources` has 5 rows, and an anon (not logged-in) request to `briefs` returns 0 rows (RLS works).
 
 ### M3: Fetch (adapters)
-- [ ] `SourceAdapter` interface: `fetchSince(config, since): Promise<RawArticle[]>`
-- [ ] `wordpress` adapter: `/wp-json/wp/v2/posts?after=…&per_page=50&_fields=…`, paginated, with HTML stripped to text. Optional `categories` filter (TechCrunch AI)
-- [ ] `html` adapter: list page → links matching a pattern from config → each article page → JSON-LD (`headline`, `datePublished`) + main text. Polite requests: browser UA, 1 request at a time, about 500 ms delay
-- [ ] Unit tests on saved fixtures (one WP JSON, one Anthropic list page and article)
+- [x] `SourceAdapter` interface: `fetchArticles(config, ctx)`, with ctx = `{ since, isKnownUrl, fetch, log }` (fetch injected for tests)
+- [x] `wordpress` adapter: `/wp-json/wp/v2/posts?after=…&per_page=50&_fields=…`, paginated, with HTML stripped to text. Optional `categories` filter (TechCrunch AI)
+- [x] `html` adapter: list page → links matching a pattern from config → each article page → JSON-LD (`headline`, `datePublished`) + main text. Polite requests: browser UA, 1 request at a time, about 500 ms delay. Already-stored URLs are skipped; pages without Article JSON-LD (category pages) are dropped
+- [x] Unit tests with small hand-made fixtures and a fake `fetch` (no network, no copied articles): 24 tests
 - **Done when:** `npm run pipeline -- --step fetch` stores articles from all 5 sources, a second run stores 0 new ones, and a broken source logs an error without stopping the others.
+- **Result (2026-11-17):** 4 of 5 sources work. MarkTechPost is behind a Cloudflare bot challenge (403 "Just a moment..."), so it is disabled rather than worked around. First run stored 39 articles; second run stored 0; run log status `success`.
+- **Known trade-off:** the `html` adapter re-reads old article pages it didn't store (older than the window) on every run: about 26 polite requests a day for Anthropic. Fine for now.
 
 ### M4: Summarize
 - [ ] `llm.ts`: OpenRouter chat call with JSON response, retry with backoff, token usage logged

@@ -8,7 +8,6 @@ Probe results from 2026-11-13 (plain `curl` with a browser User-Agent, no auth).
 |---|---|---|---|
 | aioai.pl 🇵🇱 | `wordpress` | `https://aioai.pl/wp-json/wp/v2/posts` | Full content, dates, categories as JSON |
 | the-decoder.com | `wordpress` | `https://the-decoder.com/wp-json/wp/v2/posts` | AI-only news, high signal |
-| marktechpost.com | `wordpress` | `https://www.marktechpost.com/wp-json/wp/v2/posts` | Research + tools |
 | techcrunch.com (AI) | `wordpress` | `https://techcrunch.com/wp-json/wp/v2/posts?categories=<AI id>` | Must filter to the AI category |
 | anthropic.com/news | `html` | `https://www.anthropic.com/news` | No API. List page has `/news/<slug>` links (about 26); each article has JSON-LD (`headline`, `datePublished`, `description`) + server-rendered text |
 
@@ -34,6 +33,7 @@ Probe results from 2026-11-13 (plain `curl` with a browser User-Agent, no auth).
 | openai.com/news | 403 (Cloudflare) | `https://openai.com/news/rss.xml` works. The one accepted RSS exception |
 | reddit.com | 403 without auth | Free OAuth app ("script" type) |
 | venturebeat.com | 429 rate-limited | Skip |
+| marktechpost.com | Cloudflare bot challenge (403 "Just a moment...") on the API from the pipeline, though single manual requests pass | Disabled (migration `20261117000001`). Do not work around bot protection |
 | X / Twitter, YouTube | Out of scope | |
 
 ## Adding a source
