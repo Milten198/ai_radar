@@ -135,10 +135,11 @@ textarea { resize: vertical; line-height: 1.5; font-size: 0.95rem; }
 
 /* ---------- History ---------- */
 .history { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 8px; }
-.history-item { display: flex; gap: 16px; align-items: baseline; padding: 14px 18px; color: var(--text); }
+.history > li { min-width: 0; }
+.history-item { display: flex; gap: 16px; align-items: baseline; padding: 14px 18px; color: var(--text); min-width: 0; }
 .history-item:hover { border-color: var(--accent); text-decoration: none; }
 .history-date { flex: none; width: 96px; font-weight: 600; }
-.history-preview { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.history-preview { flex: 1; min-width: 0; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .empty { text-align: center; padding: 40px 20px; }
 
