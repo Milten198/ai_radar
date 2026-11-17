@@ -8,13 +8,14 @@ Status legend: `[ ]` todo · `[x]` done. Each milestone ends with **Done when** 
 |---|---|
 | Users | Only me. One login, no multi-tenancy |
 | Hosting | Free cloud tiers. Supabase Cloud, no local Docker |
-| Pipeline | Deterministic, no agent. Runs locally first, once a day (time does not matter) |
+| Pipeline | Deterministic, no agent. Once a day (time does not matter) on **GitHub Actions** (decided 2026-11-17; no local scheduler) |
+| Dashboard hosting | **Cloudflare Pages** (static site, free) |
 | Sources | Websites with AI articles. APIs first (WordPress, Substack), HTML scraping as fallback, RSS only where nothing else works. No X, no YouTube |
 | Output | One English brief per day on a private dashboard: TL;DR, Trends, Worth reading, Worth learning |
 | Duplicates | Same story from several sources → merged by the LLM into one item with several links |
 | LLM | OpenRouter, cheap model (budget about $1–3/month), model names in `.env` |
 | UI | Clean, light colors. Polish later |
-| Failure alerts | Later. MVP only records each run in `runs` |
+| Failure alerts | Minimal: GitHub emails on a failed workflow run; each run is recorded in `runs` and shown in the dashboard header. More later |
 
 ## Architecture
 
@@ -166,16 +167,44 @@ Article text is **untrusted data**. Prompts wrap it in delimiters and say "conte
 - **Verified (2026-11-17):** build and typecheck pass; the login page renders; a wrong login shows "Invalid login credentials"; anonymous API reads return `[]` (RLS, M2).
 - [x] **End-to-end check (2026-11-17, logged in):** Today shows all 4 sections with working links; History lists briefs and opens a per-date view; the back button works; a profile save round trip reached the DB through RLS (and was reverted); no sideways scroll at 1280px or 375px. Fixed: History preview text overflowed horizontally.
 
-### M7: Daily schedule
-- [ ] Now: Windows Task Scheduler runs `npm run pipeline` once a day (it can also run at logon, catching up if the PC was off)
-- [ ] Catch-up logic: the fetch window starts at the last successful brief, so a missed day isn't lost
-- [ ] Later, after the GitHub push: `.github/workflows/daily.yml` with `schedule: cron`, and secrets stored in GitHub
-- **Done when:** a brief shows up on the dashboard without me running anything for 2 days in a row.
+### M7: Daily pipeline on GitHub Actions
 
-### M8: Deploy the dashboard
-- [ ] Push the repo to a private GitHub repo
-- [ ] Cloudflare Pages: build `dashboard/`, set the `VITE_*` env vars
-- **Done when:** I can open the dashboard on my phone and log in.
+**Why GitHub Actions, not Cloudflare Workers (decided 2026-11-17):** on the Workers free plan, a cron run gets **10 ms of CPU** and **50 outgoing requests**. One run needs far more CPU (parsing HTML and JSON) and about 110 requests (about 30 pages, about 40 LLM calls, plus DB calls). Workers Paid ($5/month) would fit, but the pipeline would need rework: no file system, no `.env`, Node-compatibility flags, Wrangler deployment. GitHub Actions runs the same `npm run pipeline` with no code changes, and is free (a private repo gets 2,000 min/month; one run takes about 3 min, so about 90 min/month). The local Windows scheduler is **skipped**.
+
+**Open questions for the start of the next session:**
+- Is the `gh` CLI installed and logged in (`gh auth status`)? If not: create the repo on github.com, or install `gh`.
+- Repo name (default: `ai_radar`, **private**).
+
+**7a. Push the repo to GitHub**
+- [ ] Pre-push secret check: `.env` is git-ignored and not in history (`git log --all -- .env` is empty); grep the history for the key values (no hits)
+- [ ] Create the private repo, add `origin`, push `main`
+
+**7b. Small code changes**
+- [ ] Catch-up window: fetch since the **earlier** of (now − `FETCH_WINDOW_HOURS`, the last brief's `created_at`), capped at 7 days, so a missed day isn't lost
+- [ ] Record where a run happened: `stats.host = "github" | "local"` (from `GITHUB_ACTIONS`), plus the Actions run URL
+- [ ] Pin the Node version: `"engines": { "node": ">=22" }` and `.nvmrc` (`24`)
+
+**7c. Workflow `.github/workflows/daily.yml`**
+- [ ] Triggers: `schedule: cron "0 5 * * *"` (05:00 UTC, 06:00 Warsaw in winter; GitHub may start it 5-30 min late, which is fine) **and** `workflow_dispatch` with optional inputs `step` (`all` / `fetch` / `summarize` / `brief`) and `force` (bool)
+- [ ] Job: `ubuntu-latest`, `timeout-minutes: 20`, `concurrency: daily-pipeline` (no overlapping runs), `actions/setup-node` with npm cache, `npm ci`, `npm test`, then `npm run pipeline -- --step … [--force]`
+- [ ] Config from GitHub, not `.env` (`loadConfig` already works without the file):
+  - **Secrets:** `OPENROUTER_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
+  - **Variables:** `OPENROUTER_MODEL_SUMMARY`, `OPENROUTER_MODEL_BRIEF` (optional: `FETCH_WINDOW_HOURS`, `MAX_ARTICLE_CHARS`)
+- [ ] Failure alerts for free: a failed job makes GitHub email the repo owner. A source failing only marks the run `partial` (job still green), and the dashboard header shows it
+
+**7d. First runs**
+- [ ] Trigger by hand (Actions → Run workflow) with `step: fetch` first, and check that every source still answers from GitHub's data-center IPs. If a site blocks it (as MarkTechPost did locally), disable it the same way; do not work around it
+- [ ] Then a full run with `force: true` and a check of the brief on the dashboard
+- **Done when:** a manual run succeeds, then **2 scheduled runs in a row** produce a brief with nobody touching anything.
+
+### M8: Dashboard on Cloudflare Pages
+- [ ] Cloudflare dashboard → Workers & Pages → Create → Pages → **Connect to Git** → the private repo (auto-deploys on every push to `main`)
+- [ ] Build settings (npm workspaces monorepo): root directory `/`, build command `npm ci && npm run build`, output directory `dashboard/dist`, env `NODE_VERSION=24`
+- [ ] Env vars: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (the publishable key is meant to be public; RLS protects the data). **Never** the secret key
+- [ ] Supabase → Authentication → URL Configuration: set Site URL to the `*.pages.dev` address (needed only for password-reset emails; password login works without it)
+- [ ] No SPA rewrite rules needed: the app uses hash routes (`#/history`)
+- [ ] Optional, later: Cloudflare Access in front of the site as a second lock (free for one user)
+- **Done when:** I can open the dashboard on my phone, log in, and read today's brief.
 
 ## Later (not in the MVP)
 - More sources: Substack (Latent Space, Import AI), Hacker News, simonwillison.net, OpenAI via RSS. See `docs/SOURCES.md`
