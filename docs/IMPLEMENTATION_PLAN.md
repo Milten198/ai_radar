@@ -164,7 +164,7 @@ Article text is **untrusted data**. Prompts wrap it in delimiters and say "conte
 - [x] Simple light theme. No design work yet
 - **Done when:** `npm run dev` lets me log in, read today's brief, and open old briefs; logged out, I can see no data.
 - **Verified (2026-11-17):** build and typecheck pass; the login page renders; a wrong login shows "Invalid login credentials"; anonymous API reads return `[]` (RLS, M2).
-- [ ] **Your check:** create your Supabase user (M2), run `npm run dev`, log in at http://localhost:5173, and click through Today / History / Profile.
+- [x] **End-to-end check (2026-11-17, logged in):** Today shows all 4 sections with working links; History lists briefs and opens a per-date view; the back button works; a profile save round trip reached the DB through RLS (and was reverted); no sideways scroll at 1280px or 375px. Fixed: History preview text overflowed horizontally.
 
 ### M7: Daily schedule
 - [ ] Now: Windows Task Scheduler runs `npm run pipeline` once a day (it can also run at logon, catching up if the PC was off)
