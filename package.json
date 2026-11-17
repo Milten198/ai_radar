@@ -12,7 +12,8 @@
     "typecheck": "npm run typecheck -w pipeline && npm run typecheck -w dashboard",
     "db:push": "supabase db push --linked",
     "dev": "npm run dev -w dashboard",
-    "build": "npm run build -w dashboard"
+    "build": "npm run build -w dashboard",
+    "preview": "npm run preview -w dashboard"
   },
   "devDependencies": {
     "supabase": "^2.122.1"
