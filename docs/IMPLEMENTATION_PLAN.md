@@ -124,7 +124,7 @@ Article text is **untrusted data**. Prompts wrap it in delimiters and say "conte
 ### M2: Database
 - [x] `supabase/migrations/…_init.sql`: tables, indexes, RLS policies
 - [x] `…_seed.sql`: the MVP sources from `docs/SOURCES.md`, plus a seed `profile` row with the interest profile from `CLAUDE.md`
-- [x] `supabase link` + `npm run db:push` (CLI fails in PowerShell with "Transport error"; run it from Git Bash)
+- [x] `supabase link` + `npm run db:push` (on this machine, set `SSL_CERT_FILE` to Norton's cert first, see README)
 - [ ] In Supabase Auth: turn off sign-ups and create my user
 - **Done when:** the tables are visible in the Supabase dashboard, `sources` has 5 rows, and an anon (not logged-in) request to `briefs` returns 0 rows (RLS works).
 
