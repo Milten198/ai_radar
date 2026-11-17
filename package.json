@@ -3,13 +3,16 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "pipeline"
+    "pipeline",
+    "dashboard"
   ],
   "scripts": {
     "pipeline": "npm run start -w pipeline --",
     "test": "npm test -w pipeline",
-    "typecheck": "npm run typecheck -w pipeline",
-    "db:push": "supabase db push --linked"
+    "typecheck": "npm run typecheck -w pipeline && npm run typecheck -w dashboard",
+    "db:push": "supabase db push --linked",
+    "dev": "npm run dev -w dashboard",
+    "build": "npm run build -w dashboard"
   },
   "devDependencies": {
     "supabase": "^2.122.1"

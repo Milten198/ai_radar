@@ -155,14 +155,16 @@ Article text is **untrusted data**. Prompts wrap it in delimiters and say "conte
 - **Known weaknesses (Flash model):** it sometimes still bundles different events by theme, and `why_for_me` can stretch to find a testing angle. Options: keep tuning `prompts/brief.md`, or set `OPENROUTER_MODEL_BRIEF` to a stronger model (one call a day, roughly $0.02-0.05).
 
 ### M6: Dashboard
-- [ ] Vite + React + TS in `dashboard/`, Supabase JS with the anon key
-- [ ] Login page (email + password)
-- [ ] **Today** view: the latest brief, with the four sections and article links
-- [ ] **History**: a list of past briefs by date
-- [ ] **Profile**: a textarea to edit my interests
-- [ ] Last-run status shown in the header (from `runs`)
-- [ ] Simple light theme. No design work yet
+- [x] Vite + React + TS in `dashboard/`, Supabase JS with the anon key. Vite reads the root `.env` (`envDir: '..'`); only `VITE_*` vars reach the browser (checked: service key and OpenRouter key are not in the build)
+- [x] Login page (email + password)
+- [x] **Today** view: the latest brief, with the four sections and article links
+- [x] **History**: a list of past briefs by date
+- [x] **Profile**: a textarea to edit my interests
+- [x] Last-run status shown in the header (from `runs`)
+- [x] Simple light theme. No design work yet
 - **Done when:** `npm run dev` lets me log in, read today's brief, and open old briefs; logged out, I can see no data.
+- **Verified (2026-11-17):** build and typecheck pass; the login page renders; a wrong login shows "Invalid login credentials"; anonymous API reads return `[]` (RLS, M2).
+- [ ] **Your check:** create your Supabase user (M2), run `npm run dev`, log in at http://localhost:5173, and click through Today / History / Profile.
 
 ### M7: Daily schedule
 - [ ] Now: Windows Task Scheduler runs `npm run pipeline` once a day (it can also run at logon, catching up if the PC was off)
