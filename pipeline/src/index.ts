@@ -3,6 +3,7 @@ import { loadConfig } from "./config.js";
 import { createDb } from "./db.js";
 import { createLlm } from "./llm.js";
 import { runFetch } from "./steps/fetch.js";
+import { runBrief } from "./steps/brief.js";
 import { runSummarize } from "./steps/summarize.js";
 import { finishRun, startRun, type RunStatus } from "./steps/runLog.js";
 
@@ -86,7 +87,27 @@ async function main(): Promise<void> {
           `${sum.usage.tokensIn} in / ${sum.usage.tokensOut} out tokens, $${sum.usage.cost.toFixed(4)}`,
       );
     }
-    if (step === "brief" || step === "all") console.log("Brief: not implemented yet (M5).");
+    if (step === "brief" || step === "all") {
+      const brief = await runBrief(db, {
+        llm: createLlm({ apiKey: config.OPENROUTER_API_KEY }),
+        model: config.OPENROUTER_MODEL_BRIEF,
+        dryRun,
+        force: values.force,
+      });
+      if (brief.status === "skipped") {
+        stats.brief = brief;
+        console.log(`Brief: skipped, ${brief.reason}.`);
+      } else {
+        const { markdown, ...rest } = brief;
+        stats.brief = rest;
+        console.log(`\n${markdown}\n`);
+        console.log(
+          `Brief ${dryRun ? "generated (dry run, not saved)" : "saved"} for ${brief.date}: ` +
+            `${brief.candidates} candidates → ${brief.reading} reading items, ` +
+            `${brief.usage.tokensIn} in / ${brief.usage.tokensOut} out tokens, $${brief.usage.cost.toFixed(4)}`,
+        );
+      }
+    }
   } catch (err) {
     if (runId) await finishRun(db, runId, "failed", stats, err instanceof Error ? err.message : String(err));
     throw err;

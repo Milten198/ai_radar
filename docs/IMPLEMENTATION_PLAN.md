@@ -146,10 +146,13 @@ Article text is **untrusted data**. Prompts wrap it in delimiters and say "conte
 - **Tuning note:** a few funding stories scored 4 (expected 2). Tweak the rubric in `pipeline/src/prompts/summarize.md` if this persists; M5 re-ranks anyway.
 
 ### M5: Brief
-- [ ] `prompts/brief.md`: the four sections, duplicate merging, ranking against the profile
-- [ ] zod validation. On invalid JSON, retry once and then fail the run
-- [ ] Save the brief and the `article_ids` it used
+- [x] `prompts/brief.md`: the four sections, duplicate merging, ranking against the profile. The model refers to articles by id only; we resolve ids to links and drop hallucinated ids
+- [x] zod validation. On invalid JSON, retry once and then fail the run
+- [x] Save the brief and the `article_ids` it used. `article_ids` = all candidates, so they are not repeated tomorrow. Brief date = Europe/Warsaw calendar day; `--force` regenerates
 - **Done when:** `npm run pipeline` (all steps) creates today's brief, the same story from 2 sources shows up once with 2 links, and I read it and it is useful (a manual check: are the top 3 items what I'd have picked?).
+- [ ] **Manual check (you):** read today's brief (printed by `npm run pipeline -- --step brief --force --dry-run`, or on the dashboard after M6). Are the top 3 what you'd have picked?
+- **Result (2026-11-17):** 38 candidates → 9 reading items, $0.0084 per brief. Duplicate merging works (the CA AG lawsuit from The Decoder + TechCrunch is one item with 2 links). Brief rerun is skipped; a full `npm run pipeline` runs all 3 steps.
+- **Known weaknesses (Flash model):** it sometimes still bundles different events by theme, and `why_for_me` can stretch to find a testing angle. Options: keep tuning `prompts/brief.md`, or set `OPENROUTER_MODEL_BRIEF` to a stronger model (one call a day, roughly $0.02-0.05).
 
 ### M6: Dashboard
 - [ ] Vite + React + TS in `dashboard/`, Supabase JS with the anon key
