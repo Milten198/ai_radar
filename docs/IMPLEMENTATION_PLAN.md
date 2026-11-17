@@ -173,7 +173,7 @@ Article text is **untrusted data**. Prompts wrap it in delimiters and say "conte
 
 **Open questions for the start of the next session:**
 - Is the `gh` CLI installed and logged in (`gh auth status`)? If not: create the repo on github.com, or install `gh`.
-- Repo name (default: `ai_radar`, **private**).
+- ~~Repo name~~ Done 2026-11-17: **public** repo `github.com/Milten198/ai_radar`, pushed. Commits use the GitHub noreply email; the Supabase project ref is a placeholder in the README.
 
 **7a. Push the repo to GitHub**
 - [ ] Pre-push secret check: `.env` is git-ignored and not in history (`git log --all -- .env` is empty); grep the history for the key values (no hits)
@@ -191,6 +191,7 @@ Article text is **untrusted data**. Prompts wrap it in delimiters and say "conte
   - **Secrets:** `OPENROUTER_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
   - **Variables:** `OPENROUTER_MODEL_SUMMARY`, `OPENROUTER_MODEL_BRIEF` (optional: `FETCH_WINDOW_HOURS`, `MAX_ARTICLE_CHARS`)
 - [ ] Failure alerts for free: a failed job makes GitHub email the repo owner. A source failing only marks the run `partial` (job still green), and the dashboard header shows it
+- [ ] **Public repo caveats:** (1) Actions logs are public: GitHub masks secrets, and the pipeline prints only titles and counts; never add debug output that prints keys or env. (2) GitHub **disables scheduled workflows in public repos after 60 days without repo activity**. The daily run makes no commits, so add a keep-alive (e.g. a monthly workflow that makes an empty commit) or re-enable it by hand when GitHub emails a warning. (3) Actions minutes are free and unlimited for public repos.
 
 **7d. First runs**
 - [ ] Trigger by hand (Actions → Run workflow) with `step: fetch` first, and check that every source still answers from GitHub's data-center IPs. If a site blocks it (as MarkTechPost did locally), disable it the same way; do not work around it
