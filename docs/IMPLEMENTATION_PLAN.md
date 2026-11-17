@@ -138,10 +138,12 @@ Article text is **untrusted data**. Prompts wrap it in delimiters and say "conte
 - **Known trade-off:** the `html` adapter re-reads old article pages it didn't store (older than the window) on every run: about 26 polite requests a day for Anthropic. Fine for now.
 
 ### M4: Summarize
-- [ ] `llm.ts`: OpenRouter chat call with JSON response, retry with backoff, token usage logged
-- [ ] `prompts/summarize.md` + zod schema for the output
-- [ ] Skip articles that already have a summary
+- [x] `llm.ts`: OpenRouter chat call with JSON response, retry with backoff, token usage logged (JSON mode + zod, re-asks once on invalid output; cost from OpenRouter `usage.include`)
+- [x] `prompts/summarize.md` + zod schema for the output
+- [x] Skip articles that already have a summary. `--limit <n>` caps articles per run (default 100, dry run 3)
 - **Done when:** every new article has a summary, a rerun makes 0 LLM calls, Polish articles get English summaries, and the run log shows the token cost.
+- **Result (2026-11-17):** 39/39 summarized with `google/gemini-2.5-flash`, 0 failed, 52.6k in / 10.7k out tokens, **$0.0425** (about $0.001 per article, about $1.30/month at 40 articles/day). Rerun: 0 calls. Polish articles summarized in English.
+- **Tuning note:** a few funding stories scored 4 (expected 2). Tweak the rubric in `pipeline/src/prompts/summarize.md` if this persists; M5 re-ranks anyway.
 
 ### M5: Brief
 - [ ] `prompts/brief.md`: the four sections, duplicate merging, ranking against the profile
